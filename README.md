@@ -103,11 +103,14 @@ settings across these services:
 
 | Service | Type | Docker command |
 | --- | --- | --- |
-| API | Web service | `sh -c 'exec uvicorn main:app --host 0.0.0.0 --port "$PORT" --no-proxy-headers'` |
+| API | Web service | `python start.py` |
 | Worker | Background worker | `celery -A app.jobs:celery_app worker --loglevel=info --concurrency=2` |
 | Scheduler | Background worker, one instance | `celery -A app.jobs:celery_app beat --loglevel=info` |
 
-Use `/api/v1/health/ready` as the API health-check path. Run `alembic upgrade head`
+Use `/api/v1/health/ready` as the API health-check path. For the single-instance
+free demo, `python start.py` applies migrations before starting the API and uses
+Render's `PORT`. For deployments with multiple API instances, use a dedicated
+migration step and start Uvicorn separately. Run `alembic upgrade head`
 as the API pre-deploy command where supported, or through a deployment job/shell
 before starting the new release. Replace the Render PostgreSQL URL scheme with
 `postgresql+asyncpg://`. Use internal database and Redis URLs, and configure the
