@@ -25,22 +25,22 @@ Cashfree integration currently supports sandbox payments only.
 Install Python 3.14. Provision PostgreSQL, a Redis cache and a separate Redis
 Celery broker. For email and media functionality also provide SMTP and an
 S3-compatible bucket. The database and bucket must exist before use.
-The example configuration uses local development services; it does not create them.
+Local defaults in `app/config.py` do not create these services.
 
 ## Run locally
 
 From this repository's root on Windows:
 
 ```powershell
-Copy-Item .env.example .env
 py -3.14 -m venv .venv
 ./.venv/Scripts/python.exe -m pip install -r requirements-dev.txt
 ./.venv/Scripts/python.exe -m alembic upgrade head
 ./.venv/Scripts/python.exe -m uvicorn main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-Edit `.env` to match your services before running migrations. On macOS/Linux
-use `cp .env.example .env`, `python3.14 -m venv .venv` and `.venv/bin/python`.
+Set environment variables from the configuration table before running migrations.
+For local overrides, create an ignored `.env` yourself. On macOS/Linux use
+`python3.14 -m venv .venv` and `.venv/bin/python`.
 
 API documentation: http://localhost:8000/docs.
 Start the frontend separately on http://localhost:3000.
@@ -122,8 +122,9 @@ production proxy handling remains part of the hardening work.
 
 ## Environment files
 
-`.env.example` is committed for setup. `.env` contains local configuration and is
-ignored by Git. Never commit database, SMTP, storage or payment credentials.
+Configure deployed settings directly in Render → Environment. No backend
+`.env.example` is included. An optional local `.env` remains ignored by Git.
+Never commit database, email, storage or payment credentials.
 
 ## Brevo email on Render Free
 
