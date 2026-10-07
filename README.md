@@ -148,3 +148,18 @@ Email still requires the background job runner. This integration does not by
 itself provide free worker/scheduler hosting; the free-demo job arrangement and
 image storage still need to be configured. No real email has been sent during
 setup. Keep the API key out of Git and the frontend environment.
+
+## Free-demo background jobs
+
+Set `DEMO_JOBS_ENABLED=true` in Render to process the durable outbox inside the
+API process. It polls after each batch with a ten-second delay and checks pending
+payments about once per minute. Enable this only on a single API instance with
+one Uvicorn worker, and disable separate Celery workers/beat for that demo.
+The default is `false`, preserving the separate production worker setup.
+
+Jobs run only while the Render service is awake. On sleep or restart, pending
+jobs remain in PostgreSQL and are picked up after the API starts again; scheduled
+notifications can be late. Brevo acceptance is not proof of inbox delivery.
+Already exhausted email jobs need a new verification request or supported retry.
+Image jobs still require configured storage. For production use dedicated workers
+and scheduler, with `DEMO_JOBS_ENABLED=false`.

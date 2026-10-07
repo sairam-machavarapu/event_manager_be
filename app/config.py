@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     cashfree_notify_url: str = ""
     email_provider: Literal["smtp", "brevo"] = "smtp"
     brevo_api_key: str = ""
+    demo_jobs_enabled: bool = False
     smtp_host: str = "localhost"
     smtp_port: int = 1025
     smtp_username: str = ""

@@ -1,4 +1,5 @@
-from contextlib import asynccontextmanager
+import asyncio
+from contextlib import asynccontextmanager, suppress
 
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
@@ -12,6 +13,7 @@ from app.bookings import public_router as availability_router
 from app.bookings import router as bookings_router
 from app.calendar import router as calendar_router
 from app.cashfree import router as payments_router
+from app.config import get_settings
 from app.database import engine
 from app.discovery import router as discovery_router
 from app.engagement import router as engagement_router
@@ -26,8 +28,19 @@ from app.workspaces import router as workspace_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    yield
-    await engine.dispose()
+    job_task = None
+    if get_settings().demo_jobs_enabled:
+        from app.demo_jobs import run_demo_jobs
+
+        job_task = asyncio.create_task(run_demo_jobs(), name="gather-demo-jobs")
+    try:
+        yield
+    finally:
+        if job_task is not None:
+            job_task.cancel()
+            with suppress(asyncio.CancelledError):
+                await job_task
+        await engine.dispose()
 
 
 app = FastAPI(title="Gather API", version="0.1.0", lifespan=lifespan)
