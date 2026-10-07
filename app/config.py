@@ -1,4 +1,5 @@
 from functools import lru_cache
+from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -16,6 +17,8 @@ class Settings(BaseSettings):
     cashfree_client_secret: str = ""
     cashfree_api_version: str = "2026-01-01"
     cashfree_notify_url: str = ""
+    email_provider: Literal["smtp", "brevo"] = "smtp"
+    brevo_api_key: str = ""
     smtp_host: str = "localhost"
     smtp_port: int = 1025
     smtp_username: str = ""

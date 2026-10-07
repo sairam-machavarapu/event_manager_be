@@ -2,8 +2,10 @@ import asyncio
 import smtplib
 from datetime import UTC, datetime, timedelta
 from email.message import EmailMessage
+from email.utils import parseaddr
 from uuid import UUID
 
+import httpx
 import sqlalchemy as sa
 from celery import Celery
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
@@ -35,6 +37,30 @@ celery_app.conf.update(
 
 def send_email(payload, message_id):
     settings = get_settings()
+    if settings.email_provider == "brevo":
+        name, address = parseaddr(settings.mail_from)
+        if not settings.brevo_api_key or not address or "@" not in address:
+            raise ValueError("Brevo email configuration incomplete")
+        body = {
+            "sender": {"email": address, "name": name or "Gather"},
+            "to": [{"email": payload["to"]}],
+            "subject": payload["subject"],
+            "textContent": payload["text"],
+        }
+        if payload.get("html"):
+            body["htmlContent"] = payload["html"]
+        # Never retain API response bodies, which may contain recipient information.
+        try:
+            with httpx.Client(timeout=15) as client:
+                response = client.post(
+                    "https://api.brevo.com/v3/smtp/email",
+                    headers={"api-key": settings.brevo_api_key, "Accept": "application/json"},
+                    json=body,
+                )
+                response.raise_for_status()
+        except httpx.HTTPError:
+            raise RuntimeError("Email provider request failed") from None
+        return
     message = EmailMessage()
     message["From"] = settings.mail_from
     message["To"] = payload["to"]

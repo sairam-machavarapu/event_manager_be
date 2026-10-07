@@ -124,3 +124,23 @@ production proxy handling remains part of the hardening work.
 
 `.env.example` is committed for setup. `.env` contains local configuration and is
 ignored by Git. Never commit database, SMTP, storage or payment credentials.
+
+## Brevo email on Render Free
+
+Add these variables in Render's backend environment settings:
+
+```text
+EMAIL_PROVIDER=brevo
+BREVO_API_KEY=<your private Brevo API key>
+MAIL_FROM=Gather <your-verified-sender@example.com>
+```
+
+Use an API key, not an SMTP key. Verify the sender in Brevo first. No SMTP
+settings are needed in Brevo mode. Local development defaults to SMTP/Mailpit.
+The existing outbox retries failed requests; provider acceptance does not confirm
+inbox delivery, and ambiguous network failures can cause duplicate mail.
+
+Email still requires the background job runner. This integration does not by
+itself provide free worker/scheduler hosting; the free-demo job arrangement and
+image storage still need to be configured. No real email has been sent during
+setup. Keep the API key out of Git and the frontend environment.
