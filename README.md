@@ -144,10 +144,9 @@ settings are needed in Brevo mode. Local development defaults to SMTP/Mailpit.
 The existing outbox retries failed requests; provider acceptance does not confirm
 inbox delivery, and ambiguous network failures can cause duplicate mail.
 
-Email still requires the background job runner. This integration does not by
-itself provide free worker/scheduler hosting; the free-demo job arrangement and
-image storage still need to be configured. No real email has been sent during
-setup. Keep the API key out of Git and the frontend environment.
+Email requires the background job runner described below. For Render Free,
+enable demo jobs inside the API; hosted image storage still needs configuration.
+Keep the API key out of Git and the frontend environment.
 
 ## Free-demo background jobs
 
@@ -163,3 +162,9 @@ notifications can be late. Brevo acceptance is not proof of inbox delivery.
 Already exhausted email jobs need a new verification request or supported retry.
 Image jobs still require configured storage. For production use dedicated workers
 and scheduler, with `DEMO_JOBS_ENABLED=false`.
+
+## Release operations
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for deployment checks, backups, restoration,
+rollback and remaining free-demo setup. GitHub Actions checks formatting and
+builds the Docker image; the deployment health workflow is manually triggered.

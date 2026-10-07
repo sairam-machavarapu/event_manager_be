@@ -1,0 +1,11 @@
+name: Check demo deployment
+on: workflow_dispatch
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check Render readiness
+        run: curl --fail --silent --show-error --max-time 90 --retry 2 --retry-delay 10 https://gather-api-a9nb.onrender.com/api/v1/health/ready
+      - name: Check frontend API proxy
+        run: curl --fail --silent --show-error --max-time 90 --retry 2 --retry-delay 10 https://event-manager-fe-zeta.vercel.app/api/v1/health/live

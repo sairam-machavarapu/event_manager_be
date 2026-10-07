@@ -6,3 +6,7 @@ __pycache__
 .env.*
 !.env.example
 tests
+backups
+*.dump
+.git
+.github

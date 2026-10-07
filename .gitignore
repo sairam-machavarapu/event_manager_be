@@ -30,6 +30,8 @@ dist/
 *.log
 tmp/
 celerybeat-schedule*
+backups/
+*.dump
 
 # Editor and operating-system files
 .idea/
