@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 async def run_demo_jobs():
+    logger.warning("Demo job runner started")
     next_payment_check = 0.0
     while True:
         try:

@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import smtplib
 from datetime import UTC, datetime, timedelta
 from email.message import EmailMessage
@@ -18,6 +19,8 @@ from app.models import EventMedia, Organizer, Outbox
 from app.notifications import recover_reminders, reminder_payload
 from app.refunds import process_refund, recover_refunds
 from app.storage import delete_object, get_object, image_variants, put_object
+
+logger = logging.getLogger(__name__)
 
 celery_app = Celery("gather", broker=get_settings().celery_broker_url)
 celery_app.conf.update(
@@ -57,9 +60,13 @@ def send_email(payload, message_id):
                     headers={"api-key": settings.brevo_api_key, "Accept": "application/json"},
                     json=body,
                 )
+                if response.is_error:
+                    logger.warning("Brevo email rejected: HTTP %s", response.status_code)
                 response.raise_for_status()
         except httpx.HTTPError:
+            logger.warning("Brevo email request failed; queued for retry")
             raise RuntimeError("Email provider request failed") from None
+        logger.warning("Brevo accepted queued email")
         return
     message = EmailMessage()
     message["From"] = settings.mail_from
